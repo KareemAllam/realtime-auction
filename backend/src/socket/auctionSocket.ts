@@ -62,11 +62,13 @@ export class AuctionSocket {
       if (success) {
         // Broadcast to all users in the auction room
         this.io.to("auction").emit("bid-update", {
+          productId: this.product.id,
           newPrice: amount,
           bidder: bidderName,
           bidderId: bidderId,
           timestamp: new Date(),
           bidId: this.product.bids[this.product.bids.length - 1]?.id,
+          bidderSocketId: socket.id,
         });
 
         // Send success confirmation to bidder

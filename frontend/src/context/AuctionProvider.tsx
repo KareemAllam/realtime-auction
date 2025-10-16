@@ -68,7 +68,11 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
 
     // Bid events
     socket.on('bid-update', (update: BidUpdate) => {
-      console.log("Bid Update", update)
+      console.log("Bid Update", update);
+
+      // Check if this is the current user's bid
+      const isMyBid = update.bidderSocketId === socket.id;
+
       dispatch({
         type: 'UPDATE_PRODUCT', payload: {
           bids: [...state.bids, {
@@ -82,20 +86,29 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
         }
       });
 
-      toast.success(`New bid: $${update.newPrice}state.products `, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      // Show different toast messages based on whether it's your bid or not
+      if (isMyBid) {
+        toast.success(`Your bid of $${update.newPrice} was placed successfully!`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } else {
+        toast.info(`New bid: $${update.newPrice} by ${update.bidder}`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
     });
 
-    socket.on('bid-success', (data: { productId: string; amount: number; message: string }) => {
-      console.log('Bid placed successfully:', data);
+    // Commented out since we handle success messages in bid-update handler
+    // socket.on('bid-success', (data: { productId: string; amount: number; message: string }) => {
+    //   console.log('Bid placed successfully:', data);
 
-      toast.success(`Bid of $${data.amount} placed successfully!`, {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    });
+    //   toast.success(`Bid of $${data.amount} placed successfully!`, {
+    //     position: "top-right",
+    //     autoClose: 3000,
+    //   });
+    // });
 
     socket.on('bid-error', (error: { message: string }) => {
       toast.error(`Bid Error: ${error.message}`, {
@@ -109,7 +122,7 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
       socket.off('disconnect');
       socket.off('product-details');
       socket.off('bid-update');
-      socket.off('bid-success');
+      // socket.off('bid-success'); // Commented out since we're not using it
       socket.off('bid-error');
     };
   }, []);

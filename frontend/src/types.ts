@@ -16,9 +16,11 @@ export type Product = {
 };
 
 export type BidUpdate = {
+  productId: string;
   newPrice: number;
   timestamp: Date;
   bidId: string;
   bidderId: string;
   bidder: string;
+  bidderSocketId: string;
 };
