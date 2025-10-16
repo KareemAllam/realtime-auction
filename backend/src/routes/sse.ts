@@ -3,11 +3,9 @@ import { Product } from "../models/Product";
 
 const router: Router = Router();
 
-// Store active SSE connections
 const sseConnections = new Set<Response>();
 let auctionProduct: Product | null = null;
 
-// Initialize auction product
 const initializeAuction = () => {
   if (!auctionProduct) {
     auctionProduct = new Product(
@@ -15,12 +13,11 @@ const initializeAuction = () => {
       "Vintage Watch",
       "Beautiful vintage watch from 1950s",
       100,
-      "https://via.placeholder.com/300x200"
+      "https://i.imgur.com/N3X9V4t.jpeg"
     );
   }
 };
 
-// Broadcast to all SSE connections
 const broadcastToSSE = (event: string, data: any) => {
   const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
   sseConnections.forEach((res) => {
@@ -33,9 +30,7 @@ const broadcastToSSE = (event: string, data: any) => {
   });
 };
 
-// SSE endpoint
 router.get("/", (req: Request, res: Response) => {
-  // Set SSE headers
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
@@ -44,19 +39,12 @@ router.get("/", (req: Request, res: Response) => {
     "Access-Control-Allow-Headers": "Cache-Control",
   });
 
-  // Add connection to active connections
   sseConnections.add(res);
-  console.log(
-    `SSE client connected. Total connections: ${sseConnections.size}`
-  );
 
-  // Initialize auction if needed
   initializeAuction();
 
-  // Send initial connection message
   res.write(`data: SSE connection established\n\n`);
 
-  // Send current auction state
   if (auctionProduct) {
     res.write(`event: auction-state\n`);
     res.write(
@@ -68,7 +56,6 @@ router.get("/", (req: Request, res: Response) => {
     );
   }
 
-  // Send periodic heartbeat
   const heartbeatInterval = setInterval(() => {
     try {
       res.write(`event: heartbeat\n`);
@@ -76,18 +63,14 @@ router.get("/", (req: Request, res: Response) => {
         `data: ${JSON.stringify({ timestamp: new Date().toISOString() })}\n\n`
       );
     } catch (error) {
-      console.error("Heartbeat error:", error);
       clearInterval(heartbeatInterval);
       sseConnections.delete(res);
     }
-  }, 30000); // Send heartbeat every 30 seconds
+  }, 30000);
 
-  // Handle client disconnect
   const cleanup = () => {
-    console.log("SSE client disconnected");
     sseConnections.delete(res);
     clearInterval(heartbeatInterval);
-    console.log(`SSE connections remaining: ${sseConnections.size}`);
   };
 
   req.on("close", cleanup);
@@ -95,9 +78,6 @@ router.get("/", (req: Request, res: Response) => {
   req.on("error", cleanup);
 });
 
-// REST API endpoints for auction management
-
-// Get current auction state
 router.get("/auction", (req: Request, res: Response) => {
   initializeAuction();
   if (auctionProduct) {
@@ -111,10 +91,8 @@ router.get("/auction", (req: Request, res: Response) => {
   }
 });
 
-// Place a bid via REST API
 router.post("/auction/bid", (req: Request, res: Response) => {
   const { bidderId, bidderName, amount } = req.body;
-  console.log("Bid placed via REST API");
   if (!auctionProduct) {
     initializeAuction();
   }
@@ -139,7 +117,6 @@ router.post("/auction/bid", (req: Request, res: Response) => {
     const newBid = auctionProduct!.bids[auctionProduct!.bids.length - 1];
 
     if (newBid) {
-      // Broadcast to all SSE connections
       broadcastToSSE("bid-update", {
         productId: auctionProduct!.id,
         newPrice: amount,
@@ -167,7 +144,6 @@ router.post("/auction/bid", (req: Request, res: Response) => {
   }
 });
 
-// Get auction history
 router.get("/auction/history", (req: Request, res: Response) => {
   initializeAuction();
   if (auctionProduct) {
@@ -186,7 +162,6 @@ router.get("/auction/history", (req: Request, res: Response) => {
   }
 });
 
-// Reset auction (admin endpoint)
 router.post("/auction/reset", (req: Request, res: Response) => {
   auctionProduct = new Product(
     "1",
@@ -196,7 +171,6 @@ router.post("/auction/reset", (req: Request, res: Response) => {
     "https://via.placeholder.com/300x200"
   );
 
-  // Broadcast reset to all SSE connections
   broadcastToSSE("auction-reset", {
     product: auctionProduct,
     message: "Auction has been reset",

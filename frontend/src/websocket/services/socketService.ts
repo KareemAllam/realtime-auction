@@ -10,14 +10,6 @@ class SocketService {
   connect() {
     if (!this.socket) {
       this.socket = io("http://localhost:5000");
-
-      this.socket.on("connect", () => {
-        console.log("Connected to server");
-      });
-
-      this.socket.on("disconnect", () => {
-        console.log("Disconnected from server");
-      });
     }
     return this.socket;
   }

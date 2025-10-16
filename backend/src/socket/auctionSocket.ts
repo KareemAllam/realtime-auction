@@ -12,20 +12,16 @@ export class AuctionSocket {
   }
 
   private initializeProduct(): void {
-    // Single product auction
     this.product = new Product(
       "1",
       "Vintage Watch",
       "Beautiful vintage watch from 1950s",
       100,
-      "https://via.placeholder.com/300x200"
+      "https://i.imgur.com/N3X9V4t.jpeg"
     );
   }
 
   public handleConnection(socket: Socket): void {
-    console.log("User connected:", socket.id);
-
-    // Handle joining the auction
     socket.on("join-auction", () => {
       socket.join("auction");
       socket.emit("product-details", this.product);
@@ -35,18 +31,14 @@ export class AuctionSocket {
       });
     });
 
-    // Handle leaving the auction
     socket.on("leave-auction", () => {
       socket.leave("auction");
     });
 
-    // Handle getting product details
     socket.on("get-product-details", () => {
-      console.log("Getting product details");
       socket.emit("product-details", this.product);
     });
 
-    // Handle placing a bid
     socket.on("place-bid", (data: BidData) => {
       const { bidderId, bidderName, amount } = data;
 
@@ -56,11 +48,9 @@ export class AuctionSocket {
         });
         return;
       }
-      // Add bid to product
       const success = this.product.addBid(bidderId, bidderName, amount);
 
       if (success) {
-        // Broadcast to all users in the auction room
         this.io.to("auction").emit("bid-update", {
           productId: this.product.id,
           newPrice: amount,
@@ -71,7 +61,6 @@ export class AuctionSocket {
           bidderSocketId: socket.id,
         });
 
-        // Send success confirmation to bidder
         socket.emit("bid-success", {
           productId: this.product.id,
           amount,
@@ -80,11 +69,6 @@ export class AuctionSocket {
       } else {
         socket.emit("bid-error", { message: "Failed to place bid" });
       }
-    });
-
-    // Handle disconnection
-    socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
     });
   }
 

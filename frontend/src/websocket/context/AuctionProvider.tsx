@@ -25,16 +25,13 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
   const [state, dispatch] = useReducer(auctionReducer, initialState);
   const currentUserIdRef = useRef(state.currentUserId);
 
-  // Update ref when state changes
   useEffect(() => {
     currentUserIdRef.current = state.currentUserId;
   }, [state.currentUserId]);
 
-  // Socket connection setup
   useEffect(() => {
     const socket = socketService.connect();
 
-    // Connection events
     socket.on('connect', () => {
       dispatch({
         type: 'UPDATE_CONNECTION_STATUS',
@@ -45,7 +42,6 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
         autoClose: 2000,
       });
 
-      // Join auction room immediately after connection
       socket.emit('join-auction');
       socket.emit('get-product-details');
     });
@@ -61,16 +57,11 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
       });
     });
 
-    // Product events
     socket.on('product-details', (product: Product) => {
       dispatch({ type: 'UPDATE_PRODUCT', payload: { product, bids: [] } });
     });
 
-    // Bid events
     socket.on('bid-update', (update: BidUpdate) => {
-      console.log("Bid Update", update);
-
-      // Check if this is the current user's bid
       const isMyBid = update.bidderSocketId === socket.id;
 
       dispatch({
@@ -86,7 +77,6 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
         }
       });
 
-      // Show different toast messages based on whether it's your bid or not
       if (isMyBid) {
         toast.success(`Your bid of $${update.newPrice} was placed successfully!`, {
           position: "top-right",
@@ -100,16 +90,6 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
       }
     });
 
-    // Commented out since we handle success messages in bid-update handler
-    // socket.on('bid-success', (data: { productId: string; amount: number; message: string }) => {
-    //   console.log('Bid placed successfully:', data);
-
-    //   toast.success(`Bid of $${data.amount} placed successfully!`, {
-    //     position: "top-right",
-    //     autoClose: 3000,
-    //   });
-    // });
-
     socket.on('bid-error', (error: { message: string }) => {
       toast.error(`Bid Error: ${error.message}`, {
         position: "top-right",
@@ -122,7 +102,6 @@ const AuctionProvider = ({ children }: React.PropsWithChildren) => {
       socket.off('disconnect');
       socket.off('product-details');
       socket.off('bid-update');
-      // socket.off('bid-success'); // Commented out since we're not using it
       socket.off('bid-error');
     };
   }, []);
