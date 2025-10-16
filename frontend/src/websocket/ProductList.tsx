@@ -1,6 +1,6 @@
-import useAuction from '../context/useAuction';
+import useAuction from './context/useAuction';
 import type { Product } from '../types';
-import ProductCard from './ProductCard';
+import ProductCard from './components/ProductCard';
 
 interface ProductListProps {
   onProductSelect: (product: Product) => void;

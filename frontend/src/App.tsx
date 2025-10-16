@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import ProductDetail from './components/ProductDetail';
-import WebSocketsView from './components/WebSocketsView';
-import SSEView from './components/SSEView';
-import AuctionProvider from './context/AuctionProvider';
+import ProductDetail from './websocket/ProductDetail';
+import WebSocketsView from './websocket/WebSocketsView';
+import SSEView from './sse/SSEView';
+import AuctionProvider from './websocket/context/AuctionProvider';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<'auction' | 'websockets' | 'sse'>('auction');

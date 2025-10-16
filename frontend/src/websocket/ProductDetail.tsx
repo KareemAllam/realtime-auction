@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import BidForm from './BidForm';
-import useAuction from '../context/useAuction';
-import RecentBids from './RecentBids';
+import BidForm from './components/BidForm';
+import useAuction from './context/useAuction';
+import RecentBids from './components/RecentBids';
 
 const ProductDetail = () => {
   const { state, placeBid, getProductDetails } = useAuction();

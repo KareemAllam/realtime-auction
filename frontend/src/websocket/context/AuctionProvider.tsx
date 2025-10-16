@@ -1,7 +1,7 @@
 import { useReducer, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import socketService from '../services/socketService';
-import type { Product, BidUpdate } from '../types';
+import type { Product, BidUpdate } from '../../types';
 import { auctionReducer } from '../reducers/auctionReducer';
 import type { AuctionState } from '../reducers/auctionReducer';
 import { AuctionContext } from './useAuction';

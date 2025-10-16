@@ -1,4 +1,4 @@
-import type { Product, Bid } from "../types";
+import type { Product, Bid } from "../../types";
 
 export interface AuctionState {
   product: Product | null;

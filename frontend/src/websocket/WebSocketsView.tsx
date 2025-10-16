@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import useAuction from '../context/useAuction';
-import IsConnected from './isConnected';
+import useAuction from './context/useAuction';
+import IsConnected from './components/isConnected';
 
 const WebSocketsView = () => {
   const { state } = useAuction();
