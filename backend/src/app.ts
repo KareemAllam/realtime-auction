@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application, Request, Response } from "express";
 import { createServer, Server } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import cors from "cors";
@@ -32,22 +32,17 @@ app.use(
 );
 app.use(express.json());
 
-// Initialize auction socket handler
 const auctionSocket = new AuctionSocket(io);
 
-// Set product reference for routes
 setProduct(auctionSocket.getProduct());
 
-// Routes
-// app.use("/api/products", productsRouter);
-// app.use("/api/sse", sseRouter);
+app.use("/api/products", productsRouter);
+app.use("/api/sse", sseRouter);
 
-// Socket.io connection handling
 io.on("connection", (socket) => {
   auctionSocket.handleConnection(socket);
 });
 
-// Error handling middleware
 app.use((err: Error, req: Request, res: Response) => {
   console.error(err.stack);
   res.status(500).json({ message: "Something went wrong!" });
